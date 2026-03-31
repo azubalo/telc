@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a1a">
+<title>Design Jobs EU</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💼</text></svg>">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a1a;--card:#141428;--card-hover:#1a1a36;
+  --accent:#6c5ce7;--accent2:#a29bfe;--text:#e8e8f0;
+  --text2:#8888aa;--border:#252540;--success:#00b894;
+  --tag-bg:#1e1e3a;--search-bg:#1a1a30;
+}
+html,body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;min-height:100dvh;
+  overflow-x:hidden;-webkit-tap-highlight-color:transparent;
+}
+.header{
+  position:sticky;top:0;z-index:100;
+  background:linear-gradient(180deg,var(--bg) 0%,rgba(10,10,26,0.95) 100%);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  padding:12px 16px 8px;border-bottom:1px solid var(--border);
+}
+.header h1{
+  font-size:20px;font-weight:700;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.header .subtitle{font-size:11px;color:var(--text2);margin-top:2px}
+.status-bar{
+  display:flex;align-items:center;gap:8px;
+  margin-top:8px;font-size:11px;color:var(--text2);
+}
+.status-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--success);
+  animation:pulse 2s infinite;
+}
+.status-dot.loading{background:#fdcb6e;animation:pulse 0.6s infinite}
+.status-dot.error{background:#e17055;animation:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.search-bar{
+  margin:8px 16px;display:flex;gap:8px;
+}
+.search-input{
+  flex:1;padding:10px 14px;border-radius:12px;
+  border:1px solid var(--border);background:var(--search-bg);
+  color:var(--text);font-size:14px;outline:none;
+  transition:border-color 0.2s;
+}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--text2)}
+
+.filters{
+  display:flex;gap:6px;padding:4px 16px 8px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.filters::-webkit-scrollbar{display:none}
+.filter-chip{
+  flex-shrink:0;padding:6px 12px;border-radius:20px;
+  background:var(--tag-bg);border:1px solid var(--border);
+  color:var(--text2);font-size:12px;cursor:pointer;
+  transition:all 0.2s;white-space:nowrap;
+}
+.filter-chip.active{
+  background:var(--accent);border-color:var(--accent);
+  color:#fff;font-weight:600;
+}
+.filter-chip:active{transform:scale(0.95)}
+
+.refresh-btn{
+  position:fixed;bottom:24px;right:24px;z-index:99;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#8b5cf6);
+  border:none;color:#fff;font-size:22px;
+  box-shadow:0 4px 20px rgba(108,92,231,0.4);
+  cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;justify-content:center;
+}
+.refresh-btn:active{transform:scale(0.9)}
+.refresh-btn.spinning svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.jobs-list{padding:8px 16px 100px}
+.job-card{
+  display:block;text-decoration:none;color:inherit;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:14px 16px;margin-bottom:10px;
+  transition:all 0.2s;position:relative;overflow:hidden;
+}
+.job-card:active{background:var(--card-hover);transform:scale(0.99)}
+.job-card .title{
+  font-size:15px;font-weight:600;color:var(--text);
+  line-height:1.3;margin-bottom:6px;
+  display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden;
+}
+.job-card .company{
+  font-size:13px;color:var(--accent2);font-weight:500;margin-bottom:4px;
+}
+.job-card .meta{
+  display:flex;flex-wrap:wrap;gap:4px 8px;
+  font-size:11px;color:var(--text2);margin-bottom:8px;
+}
+.job-card .meta span{display:flex;align-items:center;gap:3px}
+.job-card .tags{display:flex;flex-wrap:wrap;gap:4px}
+.job-card .tag{
+  padding:3px 8px;border-radius:6px;
+  background:var(--tag-bg);color:var(--accent2);
+  font-size:10px;font-weight:500;
+}
+.job-card .source-badge{
+  position:absolute;top:12px;right:12px;
+  padding:2px 8px;border-radius:6px;
+  font-size:9px;font-weight:600;text-transform:uppercase;
+  background:var(--tag-bg);color:var(--text2);
+}
+.job-card .arrow{
+  position:absolute;bottom:14px;right:14px;
+  color:var(--text2);font-size:16px;
+}
+
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--text2);
+}
+.empty-state .icon{font-size:48px;margin-bottom:16px}
+.empty-state h3{color:var(--text);margin-bottom:8px}
+
+.loading-skeleton{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:16px;margin-bottom:10px;
+  animation:shimmer 1.5s infinite;
+}
+.loading-skeleton .line{
+  height:12px;background:var(--tag-bg);border-radius:6px;margin-bottom:8px;
+}
+.loading-skeleton .line:nth-child(1){width:80%}
+.loading-skeleton .line:nth-child(2){width:50%}
+.loading-skeleton .line:nth-child(3){width:65%}
+@keyframes shimmer{0%,100%{opacity:0.6}50%{opacity:1}}
+
+.counter{
+  font-size:12px;color:var(--text2);padding:4px 16px 8px;
+}
+.counter strong{color:var(--accent2)}
+
+.install-banner{
+  display:none;margin:8px 16px;padding:12px 16px;
+  background:linear-gradient(135deg,#1a1a36,#252550);
+  border:1px solid var(--accent);border-radius:12px;
+  font-size:13px;color:var(--text);cursor:pointer;
+}
+.install-banner.show{display:flex;align-items:center;gap:10px}
+.install-banner .close{
+  margin-left:auto;color:var(--text2);background:none;
+  border:none;font-size:18px;cursor:pointer;
+}
+
+/* Pull to refresh */
+.pull-indicator{
+  text-align:center;padding:0;height:0;overflow:hidden;
+  transition:height 0.2s,padding 0.2s;color:var(--accent2);
+  font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.pull-indicator.visible{height:40px;padding:8px 0}
+.pull-indicator.releasing{color:var(--success)}
+
+/* Safe area for notched phones */
+@supports(padding: env(safe-area-inset-top)){
+  .header{padding-top:calc(12px + env(safe-area-inset-top))}
+  .jobs-list{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+  .refresh-btn{bottom:calc(24px + env(safe-area-inset-bottom))}
+}
+
+/* Source indicator colors */
+.source-badge.indeed{background:#2557a7;color:#fff}
+.source-badge.arbeitnow{background:#1a6b3c;color:#fff}
+.source-badge.remoteok{background:#ff4742;color:#fff}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Design Jobs EU</h1>
+  <div class="subtitle">Exhibition / Spatial / Retail / Messebau / Architecture</div>
+  <div class="status-bar">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">Hazir</span>
+    <span style="margin-left:auto" id="lastUpdate"></span>
+  </div>
+</div>
+
+<div class="search-bar">
+  <input type="search" class="search-input" id="searchInput" placeholder="Ara... (exhibition, Berlin, retail...)">
+</div>
+
+<div class="filters" id="filters">
+  <div class="filter-chip active" data-filter="all">Hepsi</div>
+  <div class="filter-chip" data-filter="exhibition">Exhibition</div>
+  <div class="filter-chip" data-filter="spatial">Spatial</div>
+  <div class="filter-chip" data-filter="retail">Retail</div>
+  <div class="filter-chip" data-filter="messebau">Messebau</div>
+  <div class="filter-chip" data-filter="ladenbau">Ladenbau</div>
+  <div class="filter-chip" data-filter="architect">Architect</div>
+  <div class="filter-chip" data-filter="vectorworks">Vectorworks</div>
+  <div class="filter-chip" data-filter="sketchup">SketchUp</div>
+</div>
+
+<div class="install-banner" id="installBanner">
+  <span>📱</span>
+  <span>Telefonuna yukle - Ana ekrana ekle!</span>
+  <button class="close" id="installClose">&times;</button>
+</div>
+
+<div class="pull-indicator" id="pullIndicator">&#8595; Yenilemek icin asagi cek</div>
+<div class="counter" id="counter"></div>
+<div class="jobs-list" id="jobsList"></div>
+
+<button class="refresh-btn" id="refreshBtn" title="Yenile">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+  </svg>
+</button>
+
+<script>
+const SEARCH_TERMS = [
+  'exhibition design',
+  'spatial design',
+  'Ladenbau design',
+  'Messebau design',
+  'retail design',
+  'junior architect interior',
+  'Vectorworks designer',
+  'SketchUp designer 3D',
+  'Messestand designer',
+  'exhibition stand design',
+  'Innenarchitektur',
+  'Shopdesign',
+  'store design architect',
+  'fair stand design',
+  'exhibit designer',
+  'Ausstellungsdesign',
+  'Raumgestaltung',
+];
+
+const LOCATIONS = ['Germany', 'Deutschland', 'Europe', 'Berlin', 'Munich', 'Hamburg', 'Frankfurt', 'Düsseldorf', 'Köln', 'Stuttgart'];
+
+const CORS_PROXIES = [
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
+
+let allJobs = [];
+let activeFilter = 'all';
+let searchQuery = '';
+let isLoading = false;
+
+// DOM
+const jobsList = document.getElementById('jobsList');
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+const lastUpdate = document.getElementById('lastUpdate');
+const searchInput = document.getElementById('searchInput');
+const counter = document.getElementById('counter');
+const refreshBtn = document.getElementById('refreshBtn');
+const filters = document.getElementById('filters');
+
+// --- CORS Fetch with fallback ---
+async function corsFetch(url) {
+  for (const proxy of CORS_PROXIES) {
+    try {
+      const res = await fetch(proxy(url), { signal: AbortSignal.timeout(12000) });
+      if (res.ok) return await res.text();
+    } catch(e) { /* try next */ }
+  }
+  // direct attempt
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (res.ok) return await res.text();
+  } catch(e) {}
+  return null;
+}
+
+// --- Parse RSS/Atom XML ---
+function parseRSS(xml, source) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(xml, 'text/xml');
+  const jobs = [];
+
+  // RSS 2.0
+  doc.querySelectorAll('item').forEach(item => {
+    const title = item.querySelector('title')?.textContent?.trim() || '';
+    const link = item.querySelector('link')?.textContent?.trim() || '';
+    const desc = item.querySelector('description')?.textContent?.trim() || '';
+    const pubDate = item.querySelector('pubDate')?.textContent?.trim() || '';
+    const company = extractCompany(title, desc);
+    const location = extractLocation(title + ' ' + desc);
+
+    if (title && link) {
+      jobs.push({
+        title: cleanHTML(title),
+        link,
+        description: cleanHTML(desc).substring(0, 300),
+        date: pubDate ? new Date(pubDate) : new Date(),
+        company,
+        location,
+        source,
+        tags: extractTags(title + ' ' + desc),
+      });
+    }
+  });
+
+  // Atom
+  if (jobs.length === 0) {
+    doc.querySelectorAll('entry').forEach(entry => {
+      const title = entry.querySelector('title')?.textContent?.trim() || '';
+      const linkEl = entry.querySelector('link[href]');
+      const link = linkEl?.getAttribute('href') || '';
+      const desc = entry.querySelector('summary,content')?.textContent?.trim() || '';
+      const pubDate = entry.querySelector('published,updated')?.textContent?.trim() || '';
+      const company = extractCompany(title, desc);
+      const location = extractLocation(title + ' ' + desc);
+
+      if (title && link) {
+        jobs.push({
+          title: cleanHTML(title),
+          link,
+          description: cleanHTML(desc).substring(0, 300),
+          date: pubDate ? new Date(pubDate) : new Date(),
+          company,
+          location,
+          source,
+          tags: extractTags(title + ' ' + desc),
+        });
+      }
+    });
+  }
+
+  return jobs;
+}
+
+// --- Parse JSON job APIs ---
+function parseArbeitnow(data) {
+  return (data.data || []).map(job => ({
+    title: job.title || '',
+    link: job.url || '',
+    description: (job.description || '').replace(/<[^>]*>/g,'').substring(0, 300),
+    date: job.created_at ? new Date(job.created_at * 1000) : new Date(),
+    company: job.company_name || '',
+    location: job.location || '',
+    source: 'Arbeitnow',
+    tags: [...extractTags(job.title + ' ' + (job.description||'')), ...(job.tags||[])].slice(0,5),
+  }));
+}
+
+// --- Helpers ---
+function cleanHTML(str) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = str;
+  return tmp.textContent || tmp.innerText || '';
+}
+
+function extractCompany(title, desc) {
+  // Try common patterns like "at CompanyName" or "- CompanyName"
+  const patterns = [
+    /(?:at|bei|@)\s+([A-Z][A-Za-z0-9\s&.]+)/,
+    /[-–]\s*([A-Z][A-Za-z0-9\s&.]{2,30})$/,
+    /company:\s*([^\n,]+)/i,
+  ];
+  const text = title + ' ' + desc;
+  for (const p of patterns) {
+    const m = text.match(p);
+    if (m) return m[1].trim().substring(0, 40);
+  }
+  return '';
+}
+
+function extractLocation(text) {
+  const cities = ['Berlin','Munich','München','Hamburg','Frankfurt','Düsseldorf','Köln','Cologne','Stuttgart','Leipzig','Dresden','Hannover','Nürnberg','Bremen','Essen','Dortmund','Amsterdam','Wien','Vienna','Zürich','Zurich','Paris','London','Milano','Milan','Barcelona','Praha','Prague','Warschau','Warsaw','Brüssel','Brussels','Copenhagen','Stockholm','Helsinki','Oslo','Dublin','Lisbon','Madrid','Roma','Rome','Budapest','Krakow','Bratislava','Luxembourg','Antwerp','Rotterdam','Genf','Geneva','Basel','Bern','Graz','Salzburg','Linz','Innsbruck','New York','Chicago','Los Angeles','San Francisco','USA','Deutschland','Germany','Austria','Österreich','Switzerland','Schweiz','Netherlands','France','UK','Italy','Spain','Europe','Europa','Nordrhein-Westfalen','NRW','Bayern','Bavaria','Baden-Württemberg','Hessen','Sachsen','Niedersachsen','Rheinland-Pfalz','Schleswig-Holstein','Thüringen','Brandenburg','Mecklenburg'];
+  const found = [];
+  for (const c of cities) {
+    if (text.toLowerCase().includes(c.toLowerCase())) found.push(c);
+    if (found.length >= 2) break;
+  }
+  return found.join(', ');
+}
+
+function extractTags(text) {
+  const tagMap = {
+    'exhibition': /exhibition/i,
+    'spatial': /spatial/i,
+    'retail': /retail|shop|store|laden/i,
+    'Messebau': /messebau|messestand|messe|fair.*stand|trade.*fair/i,
+    'Ladenbau': /ladenbau/i,
+    'Vectorworks': /vectorworks/i,
+    'SketchUp': /sketchup/i,
+    'AutoCAD': /autocad/i,
+    'Rhino': /rhino|rhinoceros/i,
+    '3D': /3d.*design|3d.*model/i,
+    'Interior': /interior|innen/i,
+    'Architect': /architect|architektur/i,
+    'Junior': /junior|entry|einstieg/i,
+    'Senior': /senior|lead/i,
+    'Remote': /remote|homeoffice|home.office/i,
+  };
+  const tags = [];
+  for (const [tag, regex] of Object.entries(tagMap)) {
+    if (regex.test(text)) tags.push(tag);
+  }
+  return tags.slice(0, 4);
+}
+
+function deduplicateJobs(jobs) {
+  const seen = new Set();
+  return jobs.filter(job => {
+    const key = (job.title + job.company).toLowerCase().replace(/\s+/g,'').substring(0, 80);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function timeAgo(date) {
+  const now = new Date();
+  const diff = now - date;
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (mins < 60) return `${mins} dk once`;
+  if (hours < 24) return `${hours} saat once`;
+  if (days < 30) return `${days} gun once`;
+  return `${Math.floor(days/30)} ay once`;
+}
+
+function formatDate(date) {
+  if (!date || isNaN(date)) return '';
+  return date.toLocaleDateString('tr-TR', {day:'numeric', month:'short', year:'numeric'});
+}
+
+// --- Data Sources ---
+
+// Indeed RSS feeds
+function getIndeedURLs() {
+  const urls = [];
+  const terms = ['exhibition+design', 'spatial+design', 'Messebau', 'Ladenbau', 'retail+design', 'Vectorworks', 'SketchUp+design', 'Innenarchitektur', 'Messestand', 'Ausstellungsdesign', 'exhibit+designer', 'store+design', 'Shopdesign'];
+  for (const term of terms) {
+    urls.push(`https://de.indeed.com/rss?q=${term}&l=Deutschland&sort=date`);
+  }
+  urls.push(`https://de.indeed.com/rss?q=exhibition+design&l=&sort=date`);
+  urls.push(`https://www.indeed.com/rss?q=exhibition+design+europe&sort=date`);
+  urls.push(`https://www.indeed.com/rss?q=spatial+design+europe&sort=date`);
+  urls.push(`https://at.indeed.com/rss?q=Messebau&sort=date`);
+  urls.push(`https://ch.indeed.com/rss?q=Ladenbau&sort=date`);
+  return urls;
+}
+
+// Arbeitnow (free JSON API, no key needed, CORS enabled)
+async function fetchArbeitnow() {
+  const jobs = [];
+  const pages = [1, 2, 3];
+  for (const page of pages) {
+    try {
+      // Arbeitnow supports CORS directly - no proxy needed
+      const res = await fetch(`https://www.arbeitnow.com/api/job-board-api?page=${page}`, {
+        signal: AbortSignal.timeout(10000)
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const parsed = parseArbeitnow(data);
+      // Filter for relevant design jobs
+      const filtered = parsed.filter(j => {
+        const txt = (j.title + ' ' + j.description + ' ' + j.tags.join(' ')).toLowerCase();
+        return /exhibition|spatial|retail|messe|laden|interior|architect|design|vectorworks|sketchup|3d|ausstellung|raum|shop|store|fair|stand|grafik|visual|creative|gestalt/i.test(txt);
+      });
+      jobs.push(...filtered);
+      if (!data.links?.next) break;
+    } catch(e) { break; }
+  }
+  return jobs;
+}
+
+// RemoteOK (free JSON API, CORS enabled)
+async function fetchRemoteOK() {
+  try {
+    const res = await fetch('https://remoteok.com/api', {
+      signal: AbortSignal.timeout(10000),
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    // First element is legal notice, skip it
+    const listings = Array.isArray(data) ? data.slice(1) : [];
+    return listings
+      .filter(job => {
+        const txt = (job.position + ' ' + (job.description||'') + ' ' + (job.tags||[]).join(' ')).toLowerCase();
+        return /design|architect|3d|interior|exhibition|spatial|retail|creative|visual|graphic|cad/i.test(txt);
+      })
+      .map(job => ({
+        title: job.position || '',
+        link: job.url || `https://remoteok.com/remote-jobs/${job.id}`,
+        description: (job.description || '').replace(/<[^>]*>/g,'').substring(0, 300),
+        date: job.date ? new Date(job.date) : (job.epoch ? new Date(job.epoch * 1000) : new Date()),
+        company: job.company || '',
+        location: job.location || 'Remote',
+        source: 'RemoteOK',
+        tags: [...extractTags(job.position + ' ' + (job.description||'')), ...(job.tags||[]).slice(0,2)].slice(0,5),
+      }));
+  } catch(e) { return []; }
+}
+
+// --- Fetch All Sources ---
+async function fetchAllJobs() {
+  if (isLoading) return;
+  isLoading = true;
+  setStatus('loading', 'Ilanlar yukleniyor...');
+  refreshBtn.classList.add('spinning');
+
+  const allNewJobs = [];
+  let sourceCount = 0;
+
+  // Fetch Indeed RSS feeds (batch - use CORS proxy)
+  const indeedURLs = getIndeedURLs();
+  const indeedPromises = indeedURLs.map(async url => {
+    try {
+      const xml = await corsFetch(url);
+      if (xml) return parseRSS(xml, 'Indeed');
+    } catch(e) {}
+    return [];
+  });
+
+  // Fetch Arbeitnow (direct, CORS supported)
+  const arbeitnowPromise = fetchArbeitnow().catch(() => []);
+
+  // Fetch RemoteOK (direct, CORS supported)
+  const remoteOKPromise = fetchRemoteOK().catch(() => []);
+
+  // Run all in parallel
+  try {
+    const results = await Promise.allSettled([
+      ...indeedPromises,
+      arbeitnowPromise,
+      remoteOKPromise,
+    ]);
+
+    for (const result of results) {
+      if (result.status === 'fulfilled' && Array.isArray(result.value) && result.value.length > 0) {
+        allNewJobs.push(...result.value);
+        sourceCount++;
+      }
+    }
+  } catch(e) {}
+
+  // Merge with cached jobs (new jobs take priority)
+  const cached = loadCache();
+  const merged = deduplicateJobs([...allNewJobs, ...cached]);
+
+  // Sort newest first
+  merged.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  allJobs = merged;
+  saveCache(allJobs);
+
+  isLoading = false;
+  refreshBtn.classList.remove('spinning');
+
+  if (allJobs.length > 0) {
+    setStatus('ok', `${allJobs.length} ilan bulundu (${sourceCount} kaynak)`);
+  } else {
+    setStatus('error', 'Ilan bulunamadi - tekrar dene');
+  }
+
+  lastUpdate.textContent = `Son: ${new Date().toLocaleTimeString('tr-TR')}`;
+  renderJobs();
+}
+
+// --- Cache ---
+function saveCache(jobs) {
+  try {
+    const data = jobs.map(j => ({...j, date: j.date instanceof Date ? j.date.toISOString() : j.date}));
+    localStorage.setItem('designJobs', JSON.stringify(data));
+    localStorage.setItem('designJobsTime', Date.now().toString());
+  } catch(e) {}
+}
+
+function loadCache() {
+  try {
+    const data = localStorage.getItem('designJobs');
+    if (!data) return [];
+    return JSON.parse(data).map(j => ({...j, date: new Date(j.date)}));
+  } catch(e) { return []; }
+}
+
+function getCacheAge() {
+  const t = localStorage.getItem('designJobsTime');
+  return t ? Date.now() - parseInt(t) : Infinity;
+}
+
+// --- Render ---
+function renderJobs() {
+  let jobs = [...allJobs];
+
+  // Filter
+  if (activeFilter !== 'all') {
+    jobs = jobs.filter(j => {
+      const txt = (j.title + ' ' + j.description + ' ' + j.tags.join(' ') + ' ' + j.company).toLowerCase();
+      return txt.includes(activeFilter.toLowerCase());
+    });
+  }
+
+  // Search
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    jobs = jobs.filter(j => {
+      const txt = (j.title + ' ' + j.description + ' ' + j.company + ' ' + j.location + ' ' + j.tags.join(' ')).toLowerCase();
+      return txt.includes(q);
+    });
+  }
+
+  counter.innerHTML = `<strong>${jobs.length}</strong> ilan ${activeFilter !== 'all' ? `(${activeFilter})` : ''}`;
+
+  if (jobs.length === 0 && !isLoading) {
+    jobsList.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🔍</div>
+        <h3>${isLoading ? 'Yukleniyor...' : 'Ilan bulunamadi'}</h3>
+        <p>${searchQuery ? 'Farkli anahtar kelime dene' : 'Yenilemek icin asagidaki butona bas'}</p>
+      </div>`;
+    return;
+  }
+
+  if (isLoading && jobs.length === 0) {
+    jobsList.innerHTML = Array(5).fill(`
+      <div class="loading-skeleton">
+        <div class="line"></div><div class="line"></div><div class="line"></div>
+      </div>`).join('');
+    return;
+  }
+
+  jobsList.innerHTML = jobs.map(job => `
+    <a class="job-card" href="${escapeAttr(job.link)}" target="_blank" rel="noopener">
+      <div class="title">${escapeHTML(job.title)}</div>
+      ${job.company ? `<div class="company">${escapeHTML(job.company)}</div>` : ''}
+      <div class="meta">
+        ${job.location ? `<span>📍 ${escapeHTML(job.location)}</span>` : ''}
+        ${job.date ? `<span>🕐 ${timeAgo(job.date)}</span>` : ''}
+        ${job.date ? `<span>${formatDate(job.date)}</span>` : ''}
+      </div>
+      ${job.tags.length ? `<div class="tags">${job.tags.map(t => `<span class="tag">${escapeHTML(t)}</span>`).join('')}</div>` : ''}
+      <span class="source-badge ${job.source.toLowerCase().replace(/\s/g,'')}">${escapeHTML(job.source)}</span>
+      <span class="arrow">→</span>
+    </a>
+  `).join('');
+}
+
+function escapeHTML(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+function escapeAttr(str) {
+  return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function setStatus(state, text) {
+  statusDot.className = 'status-dot' + (state === 'loading' ? ' loading' : state === 'error' ? ' error' : '');
+  statusText.textContent = text;
+}
+
+// --- Events ---
+searchInput.addEventListener('input', e => {
+  searchQuery = e.target.value;
+  renderJobs();
+});
+
+filters.addEventListener('click', e => {
+  const chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  filters.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  activeFilter = chip.dataset.filter;
+  renderJobs();
+});
+
+refreshBtn.addEventListener('click', () => fetchAllJobs());
+
+// --- Pull to Refresh ---
+let pullStart = 0;
+let pulling = false;
+const pullEl = document.getElementById('pullIndicator');
+
+document.addEventListener('touchstart', e => {
+  if (window.scrollY === 0) {
+    pullStart = e.touches[0].clientY;
+    pulling = true;
+  }
+}, { passive: true });
+
+document.addEventListener('touchmove', e => {
+  if (!pulling) return;
+  const diff = e.touches[0].clientY - pullStart;
+  if (diff > 10 && diff < 150) {
+    pullEl.classList.add('visible');
+    if (diff > 80) {
+      pullEl.classList.add('releasing');
+      pullEl.innerHTML = '&#8593; Birak - yenileniyor!';
+    } else {
+      pullEl.classList.remove('releasing');
+      pullEl.innerHTML = '&#8595; Yenilemek icin asagi cek';
+    }
+  }
+}, { passive: true });
+
+document.addEventListener('touchend', () => {
+  if (!pulling) return;
+  if (pullEl.classList.contains('releasing')) {
+    fetchAllJobs();
+  }
+  pullEl.classList.remove('visible', 'releasing');
+  pullEl.innerHTML = '&#8595; Yenilemek icin asagi cek';
+  pulling = false;
+  pullStart = 0;
+});
+
+// --- PWA Install ---
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+document.getElementById('installBanner').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  }
+  document.getElementById('installBanner').classList.remove('show');
+});
+document.getElementById('installClose').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('installBanner').classList.remove('show');
+});
+
+// --- Service Worker ---
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// --- Init ---
+(async function init() {
+  // Load cache first for instant display
+  const cached = loadCache();
+  if (cached.length > 0) {
+    allJobs = cached;
+    renderJobs();
+    setStatus('ok', `${allJobs.length} ilan (onbellek)`);
+    lastUpdate.textContent = 'Onbellekten';
+  } else {
+    jobsList.innerHTML = Array(5).fill(`
+      <div class="loading-skeleton">
+        <div class="line"></div><div class="line"></div><div class="line"></div>
+      </div>`).join('');
+  }
+
+  // Auto-refresh if cache older than 30 minutes or empty
+  if (getCacheAge() > 30 * 60 * 1000 || cached.length === 0) {
+    fetchAllJobs();
+  }
+})();
+
+// Auto-refresh every 30 minutes while page is visible
+setInterval(() => {
+  if (!document.hidden) fetchAllJobs();
+}, 30 * 60 * 1000);
+</script>
+</body>
+</html>
