@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATS CV Editor - Professional Resume Builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Top Toolbar -->
+  <header id="toolbar">
+    <div class="toolbar-left">
+      <span class="logo">ATS CV Editor</span>
+      <div class="toolbar-divider"></div>
+      <button id="btn-undo" class="tool-btn" title="Undo (Ctrl+Z)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10h10a5 5 0 0 1 0 10H9"/><path d="M3 10l4-4"/><path d="M3 10l4 4"/></svg>
+      </button>
+      <button id="btn-redo" class="tool-btn" title="Redo (Ctrl+Y)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10H11a5 5 0 0 0 0 10h4"/><path d="M21 10l-4-4"/><path d="M21 10l-4 4"/></svg>
+      </button>
+      <div class="toolbar-divider"></div>
+      <button id="btn-bold" class="tool-btn" title="Bold (Ctrl+B)"><b>B</b></button>
+      <button id="btn-italic" class="tool-btn" title="Italic (Ctrl+I)"><i>I</i></button>
+      <button id="btn-underline" class="tool-btn" title="Underline (Ctrl+U)"><u>U</u></button>
+      <div class="toolbar-divider"></div>
+      <button id="btn-align-left" class="tool-btn" title="Align Left">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="18" y2="18"/></svg>
+      </button>
+      <button id="btn-align-center" class="tool-btn" title="Align Center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      </button>
+      <button id="btn-align-right" class="tool-btn" title="Align Right">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="6" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button id="btn-align-justify" class="tool-btn" title="Justify">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="toolbar-divider"></div>
+      <button id="btn-bullet" class="tool-btn" title="Bullet List">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="9" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="9" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>
+      </button>
+      <button id="btn-ordered" class="tool-btn" title="Ordered List">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><text x="2" y="8" font-size="7" fill="currentColor" stroke="none">1</text><text x="2" y="14" font-size="7" fill="currentColor" stroke="none">2</text><text x="2" y="20" font-size="7" fill="currentColor" stroke="none">3</text></svg>
+      </button>
+    </div>
+    <div class="toolbar-right">
+      <button id="btn-ats-check" class="tool-btn accent-btn" title="ATS Score Check">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        ATS Check
+      </button>
+      <button id="btn-download" class="tool-btn primary-btn" title="Download PDF">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PDF
+      </button>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- Left Sidebar: Style Panel -->
+    <aside id="style-panel" class="panel">
+      <div class="panel-header">
+        <h3>Style Controls</h3>
+      </div>
+      <div class="panel-body">
+        <!-- Page Margins -->
+        <section class="control-group">
+          <h4 class="control-group-title">Page Margins</h4>
+          <div class="margin-grid">
+            <div class="control-row">
+              <label>Top</label>
+              <input type="range" id="margin-top" min="5" max="40" value="20" class="slider">
+              <span class="slider-val" data-for="margin-top">20mm</span>
+            </div>
+            <div class="control-row">
+              <label>Bottom</label>
+              <input type="range" id="margin-bottom" min="5" max="40" value="20" class="slider">
+              <span class="slider-val" data-for="margin-bottom">20mm</span>
+            </div>
+            <div class="control-row">
+              <label>Left</label>
+              <input type="range" id="margin-left" min="5" max="40" value="20" class="slider">
+              <span class="slider-val" data-for="margin-left">20mm</span>
+            </div>
+            <div class="control-row">
+              <label>Right</label>
+              <input type="range" id="margin-right" min="5" max="40" value="20" class="slider">
+              <span class="slider-val" data-for="margin-right">20mm</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Typography -->
+        <section class="control-group">
+          <h4 class="control-group-title">Typography</h4>
+          <div class="control-row">
+            <label>Font</label>
+            <select id="font-family" class="select-input">
+              <option value="Arial, Helvetica, sans-serif">Arial</option>
+              <option value="Calibri, 'Gill Sans', sans-serif">Calibri</option>
+              <option value="Helvetica, Arial, sans-serif">Helvetica</option>
+              <option value="Georgia, serif">Georgia</option>
+              <option value="Roboto, Arial, sans-serif" selected>Roboto</option>
+              <option value="'Times New Roman', Times, serif">Times New Roman</option>
+            </select>
+          </div>
+          <div class="control-row">
+            <label>Size</label>
+            <input type="range" id="font-size" min="8" max="16" value="11" step="0.5" class="slider">
+            <span class="slider-val" data-for="font-size">11pt</span>
+          </div>
+          <div class="control-row">
+            <label>Line Height</label>
+            <input type="range" id="line-height" min="1" max="2.5" value="1.5" step="0.05" class="slider">
+            <span class="slider-val" data-for="line-height">1.5</span>
+          </div>
+          <div class="control-row">
+            <label>Letter Spacing</label>
+            <input type="range" id="letter-spacing" min="-0.5" max="2" value="0" step="0.1" class="slider">
+            <span class="slider-val" data-for="letter-spacing">0px</span>
+          </div>
+        </section>
+
+        <!-- Colors -->
+        <section class="control-group">
+          <h4 class="control-group-title">Colors</h4>
+          <div class="control-row">
+            <label>Text</label>
+            <input type="color" id="text-color" value="#1a1a1a" class="color-input">
+          </div>
+          <div class="control-row">
+            <label>Accent</label>
+            <input type="color" id="accent-color" value="#1a5276" class="color-input">
+          </div>
+          <div class="control-row">
+            <label>Heading</label>
+            <input type="color" id="heading-color" value="#1a5276" class="color-input">
+          </div>
+        </section>
+
+        <!-- Heading Sizes -->
+        <section class="control-group">
+          <h4 class="control-group-title">Heading Sizes</h4>
+          <div class="control-row">
+            <label>Name (H1)</label>
+            <input type="range" id="h1-size" min="16" max="32" value="22" step="1" class="slider">
+            <span class="slider-val" data-for="h1-size">22pt</span>
+          </div>
+          <div class="control-row">
+            <label>Section (H2)</label>
+            <input type="range" id="h2-size" min="12" max="24" value="14" step="1" class="slider">
+            <span class="slider-val" data-for="h2-size">14pt</span>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <!-- Center: A4 Canvas -->
+    <div id="canvas-area">
+      <div id="pages-container">
+        <!-- Pages will be created dynamically -->
+      </div>
+    </div>
+
+    <!-- Right Panel: ATS Check -->
+    <aside id="ats-panel" class="panel hidden">
+      <div class="panel-header">
+        <h3>ATS Compatibility Check</h3>
+        <button id="btn-close-ats" class="close-btn">&times;</button>
+      </div>
+      <div class="panel-body">
+        <section class="control-group">
+          <h4 class="control-group-title">Job Description</h4>
+          <textarea id="job-description" placeholder="Paste the job description here to compare with your CV..." rows="8"></textarea>
+        </section>
+
+        <section class="control-group">
+          <h4 class="control-group-title">API Key</h4>
+          <input type="password" id="api-key" placeholder="Enter Claude API key..." class="text-input">
+          <small class="help-text">Your key is stored locally and never sent to any server except Anthropic's API.</small>
+        </section>
+
+        <button id="btn-run-ats" class="primary-btn full-width">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Analyze ATS Compatibility
+        </button>
+
+        <div id="ats-results" class="hidden">
+          <div id="ats-score-display">
+            <div id="score-ring">
+              <svg viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" stroke="#2a2a3e" stroke-width="8" fill="none"/>
+                <circle id="score-circle" cx="60" cy="60" r="54" stroke="#4ecdc4" stroke-width="8" fill="none"
+                  stroke-dasharray="339.292" stroke-dashoffset="339.292" stroke-linecap="round"
+                  transform="rotate(-90 60 60)"/>
+              </svg>
+              <span id="score-number">0</span>
+            </div>
+            <span id="score-label">ATS Score</span>
+          </div>
+
+          <div id="ats-details">
+            <div class="ats-section" id="missing-keywords-section">
+              <h4>Missing Keywords</h4>
+              <div id="missing-keywords" class="tag-list"></div>
+            </div>
+            <div class="ats-section" id="suggestions-section">
+              <h4>Suggested Fixes</h4>
+              <div id="suggestions-list"></div>
+            </div>
+            <div class="ats-section" id="matched-keywords-section">
+              <h4>Matched Keywords</h4>
+              <div id="matched-keywords" class="tag-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="ats-loading" class="hidden">
+          <div class="spinner"></div>
+          <p>Analyzing your CV against the job description...</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
